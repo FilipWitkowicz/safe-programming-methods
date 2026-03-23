@@ -22,12 +22,12 @@ struct Args {
     int ITERATIONS;
 };
 
-int assign_core(int group_id, int role, int cores_per_socket) {
+int assign_core(int group_id, int role, int socket1_offset) {
     int offset = group_id;
     if (role <= 1) {
         return offset * 2 + role;
     } else {
-        return cores_per_socket + offset * 2 + (role - 2);
+        return socket1_offset + offset * 2 + (role - 2);
     }
 }
 
@@ -80,11 +80,11 @@ void* thread_func(void* ptr) {
 int main(int argc, char* argv[]) {
     int CORES = atoi(argv[1]);
     int ITERATIONS = atoi(argv[2]);
+    int socket1_offset = atoi(argv[3]);
     int NUM_GROUPS = CORES / THREADS_PER_GROUP;
-    int cores_per_socket = CORES / 2;
 
     cout << "[LOG] " << NUM_GROUPS << " groups, " << CORES << " cores, "
-         << ITERATIONS << " iterations, " << cores_per_socket << " cores/socket" << endl;
+         << ITERATIONS << " iterations, socket1_offset=" << socket1_offset << endl;
 
     ThreadsGroup* groups = new ThreadsGroup[NUM_GROUPS];
     pthread_t* thr = new pthread_t[CORES];
@@ -104,7 +104,7 @@ int main(int argc, char* argv[]) {
     for (int i = 0; i < CORES; i++) {
         int group_id = i / THREADS_PER_GROUP;
         int role = i % THREADS_PER_GROUP;
-        int core = assign_core(group_id, role, cores_per_socket);
+        int core = assign_core(group_id, role, socket1_offset);
         args[i] = { &groups[group_id], role, core, ITERATIONS };
         pthread_create(&thr[i], nullptr, thread_func, &args[i]);
     }
@@ -112,11 +112,11 @@ int main(int argc, char* argv[]) {
     // log core assignments for first and last group
     cout << "[LOG] Group 0: ";
     for (int r = 0; r < THREADS_PER_GROUP; r++)
-        cout << "role" << r << "->core" << assign_core(0, r, cores_per_socket) << " ";
+        cout << "role" << r << "->core" << assign_core(0, r, socket1_offset) << " ";
     cout << endl;
     cout << "[LOG] Group " << NUM_GROUPS-1 << ": ";
     for (int r = 0; r < THREADS_PER_GROUP; r++)
-        cout << "role" << r << "->core" << assign_core(NUM_GROUPS-1, r, cores_per_socket) << " ";
+        cout << "role" << r << "->core" << assign_core(NUM_GROUPS-1, r, socket1_offset) << " ";
     cout << endl;
 
     for (int i = 0; i < CORES; i++)

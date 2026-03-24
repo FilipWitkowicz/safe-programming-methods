@@ -38,9 +38,9 @@ void* thread_func(void* ptr) {
     ThreadsGroup& g = *a->group;
 
     cpu_set_t cpuset;
-    CPU_ZERO(&cpuset);
-    CPU_SET(a->core, &cpuset);
-    pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset);
+    CPU_ZERO(&cpuset); // clear CPU bitmask
+    CPU_SET(a->core, &cpuset); // mark exactly one core (a->core) in the mask
+    pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset); // pin thread to the selected core
 
     for (int i = 0; i < a->ITERATIONS; i++) {
         pthread_barrier_wait(&g.go); // start

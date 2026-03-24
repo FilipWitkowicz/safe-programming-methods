@@ -7,7 +7,7 @@
 #SBATCH --time=00:20:00
 #SBATCH --output=iriw_slurm_log.txt
 
-g++ -O3 -pthread iriw.cpp -o iriw
+g++ -O0 -pthread iriw.cpp -o iriw
 
 echo "=== HOST ==="
 hostname

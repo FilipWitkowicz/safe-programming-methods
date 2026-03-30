@@ -1,0 +1,8 @@
+gcc -O0 -pthread -o buggy buggy.c && gcc -O0 -pthread -o fixed fixed.c && gcc -O0 -pthread -o fixed2 fixed2.c
+
+
+
+cc -O0 -pthread -o buggy buggy.c && gcc -O0 -pthread -o fixed fixed.c && gcc -O0 -pthread -o fixed2 fixed2.c && echo "=== Kompilacja OK ==="
+
+
+./buggy 10000000 && ./fixed 10000000 && ./fixed2 10000000   
